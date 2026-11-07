@@ -4,14 +4,10 @@ local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
 local Lighting = game:GetService("Lighting")
 
--- Limpa instâncias antigas se existirem
 if CoreGui:FindFirstChild("CubnitSpinIntro") then CoreGui.CubnitSpinIntro:Destroy() end
 if CoreGui:FindFirstChild("ProjectSpawnismoUI") then CoreGui.ProjectSpawnismoUI:Destroy() end
 if Lighting:FindFirstChild("SpawnismoBlur") then Lighting:FindFirstChild("SpawnismoBlur"):Destroy() end
 
--- =========================================================================
--- INTRODUÇÃO (CUBNIT SPIN INTRO)
--- =========================================================================
 local IntroGui = Instance.new("ScreenGui")
 IntroGui.Name = "CubnitSpinIntro"
 IntroGui.ResetOnSpawn = false
@@ -19,7 +15,6 @@ IntroGui.IgnoreGuiInset = true
 IntroGui.DisplayOrder = 999999
 IntroGui.Parent = CoreGui
 
--- Escala responsiva para a Intro
 local introScale = Instance.new("UIScale", IntroGui)
 local function updateIntroScale()
     if not UserInputService.TouchEnabled then
@@ -30,7 +25,6 @@ local function updateIntroScale()
 end
 updateIntroScale()
 
--- Fundo Escuro da Intro
 local IntroBackground = Instance.new("Frame")
 IntroBackground.Name = "Background"
 IntroBackground.Size = UDim2.new(1, 1000, 1, 1000)
@@ -41,7 +35,6 @@ IntroBackground.BorderSizePixel = 0
 IntroBackground.ZIndex = 9999
 IntroBackground.Parent = IntroGui
 
--- Ícone Giratório
 local IconImage = Instance.new("ImageLabel")
 IconImage.Name = "SpinIcon"
 IconImage.BackgroundTransparency = 1
@@ -59,7 +52,6 @@ local AspectRatio = Instance.new("UIAspectRatioConstraint")
 AspectRatio.AspectRatio = 1
 AspectRatio.Parent = IconImage
 
--- Execução da Animação Fluida da Intro
 task.spawn(function()
     task.wait(0.1)
 
@@ -96,9 +88,6 @@ task.spawn(function()
     dissipate.Completed:Wait()
     IntroGui:Destroy()
 
-    -- =========================================================================
-    -- EXECUÇÃO DA INTERFACE PRINCIPAL (PROJECT SPAWNSILAS)
-    -- =========================================================================
     local DISCORD_LINK = "https://discord.gg/qGJYYzyE4"
     local ID_TOP_DISCORD   = "rbxassetid://136885103812508"
     local ID_CLOSE_BTN     = "rbxassetid://78774633521849"
@@ -195,9 +184,6 @@ task.spawn(function()
     pcall(function() ScreenGui.Parent = CoreGui end)
     if not ScreenGui.Parent then ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui") end
 
-    -- =====================================================================
-    -- ADAPTAÇÃO AUTOMÁTICA DE ESCALA (+70% NO PC, PADRÃO NO MOBILE)
-    -- =====================================================================
     local uiScale = Instance.new("UIScale", ScreenGui)
     local function updateUIScale()
         if not UserInputService.TouchEnabled then
@@ -208,7 +194,6 @@ task.spawn(function()
     end
     updateUIScale()
 
-    -- Atualiza escala se o dispositivo mudar (ex: abrir teclado externo, etc.)
     UserInputService.LastInputTypeChanged:Connect(updateUIScale)
 
     local fontArcade = Enum.Font.Arcade
