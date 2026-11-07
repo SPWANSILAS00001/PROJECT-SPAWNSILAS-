@@ -1,0 +1,334 @@
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Debris = game:GetService("Debris")
+local Lighting = game:GetService("Lighting")
+
+-- Limpa instâncias antigas se existirem
+if CoreGui:FindFirstChild("CubnitSpinIntro") then CoreGui.CubnitSpinIntro:Destroy() end
+if CoreGui:FindFirstChild("ProjectSpawnismoUI") then CoreGui.ProjectSpawnismoUI:Destroy() end
+if Lighting:FindFirstChild("SpawnismoBlur") then Lighting:FindFirstChild("SpawnismoBlur"):Destroy() end
+
+-- =========================================================================
+-- INTRODUÇÃO (CUBNIT SPIN INTRO)
+-- =========================================================================
+local IntroGui = Instance.new("ScreenGui")
+IntroGui.Name = "CubnitSpinIntro"
+IntroGui.ResetOnSpawn = false
+IntroGui.IgnoreGuiInset = true
+IntroGui.DisplayOrder = 999999
+IntroGui.Parent = CoreGui
+
+-- Escala responsiva para a Intro
+local introScale = Instance.new("UIScale", IntroGui)
+local function updateIntroScale()
+    if not UserInputService.TouchEnabled then
+        introScale.Scale = 1.7
+    else
+        introScale.Scale = 1.0
+    end
+end
+updateIntroScale()
+
+-- Fundo Escuro da Intro
+local IntroBackground = Instance.new("Frame")
+IntroBackground.Name = "Background"
+IntroBackground.Size = UDim2.new(1, 1000, 1, 1000)
+IntroBackground.Position = UDim2.new(0, -500, 0, -500)
+IntroBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+IntroBackground.BackgroundTransparency = 1
+IntroBackground.BorderSizePixel = 0
+IntroBackground.ZIndex = 9999
+IntroBackground.Parent = IntroGui
+
+-- Ícone Giratório
+local IconImage = Instance.new("ImageLabel")
+IconImage.Name = "SpinIcon"
+IconImage.BackgroundTransparency = 1
+IconImage.Image = "rbxassetid://77667780640343"
+IconImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
+IconImage.ImageTransparency = 1
+IconImage.Size = UDim2.new(0, 250, 0, 250)
+IconImage.AnchorPoint = Vector2.new(0.5, 0.5)
+IconImage.Position = UDim2.new(-0.2, 0, 1.2, 0)
+IconImage.Rotation = -180
+IconImage.ZIndex = 10000
+IconImage.Parent = IntroGui
+
+local AspectRatio = Instance.new("UIAspectRatioConstraint")
+AspectRatio.AspectRatio = 1
+AspectRatio.Parent = IconImage
+
+-- Execução da Animação Fluida da Intro
+task.spawn(function()
+    task.wait(0.1)
+
+    local infoE = TweenInfo.new(1.3, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+    local infoB = TweenInfo.new(1.8, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut)
+    local infoI = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local infoD = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+    TweenService:Create(IconImage, infoE, {
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        ImageTransparency = 0,
+        Rotation = 720
+    }):Play()
+    TweenService:Create(IntroBackground, infoB, {BackgroundTransparency = 0.15}):Play()
+
+    task.wait(1.2)
+
+    local fix = TweenService:Create(IconImage, infoI, {
+        Size = UDim2.new(0, 260, 0, 260),
+        Rotation = 0
+    })
+    fix:Play()
+    fix.Completed:Wait()
+
+    task.wait(1.5)
+
+    TweenService:Create(IntroBackground, infoD, {BackgroundTransparency = 1}):Play()
+    local dissipate = TweenService:Create(IconImage, infoD, {
+        Size = UDim2.new(0, 400, 0, 400),
+        ImageTransparency = 1
+    })
+    dissipate:Play()
+
+    dissipate.Completed:Wait()
+    IntroGui:Destroy()
+
+    -- =========================================================================
+    -- EXECUÇÃO DA INTERFACE PRINCIPAL (PROJECT SPAWNSILAS)
+    -- =========================================================================
+    local DISCORD_LINK = "https://discord.gg/qGJYYzyE4"
+    local ID_TOP_DISCORD   = "rbxassetid://136885103812508"
+    local ID_CLOSE_BTN     = "rbxassetid://78774633521849"
+
+    local Blur = Instance.new("BlurEffect")
+    Blur.Name = "SpawnismoBlur"
+    Blur.Size = 0
+    Blur.Parent = Lighting
+    TweenService:Create(Blur, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = 35}):Play()
+
+    task.spawn(function()
+        local openSound = Instance.new("Sound")
+        openSound.SoundId = "rbxassetid://97881181065416"
+        openSound.Volume = 0.52
+        pcall(function() openSound.Parent = CoreGui end)
+        if not openSound.Parent then openSound.Parent = game:GetService("SoundService") end
+        openSound:Play()
+        Debris:AddItem(openSound, 3)
+    end)
+
+    local function PlayClickSound()
+        task.spawn(function()
+            local sound = Instance.new("Sound")
+            sound.SoundId = "rbxassetid://84530679244634"
+            sound.Volume = 0.3
+            pcall(function() sound.Parent = CoreGui end)
+            if not sound.Parent then sound.Parent = game:GetService("SoundService") end
+            sound:Play()
+            Debris:AddItem(sound, 1.5)
+        end)
+    end
+
+    local function Create(className, parent, properties, corner, stroke)
+        local obj = Instance.new(className)
+        for k, v in pairs(properties) do obj[k] = v end
+        if corner then Instance.new("UICorner", obj).CornerRadius = UDim.new(0, corner) end
+        if stroke then
+            local str = Instance.new("UIStroke", obj)
+            for k, v in pairs(stroke) do str[k] = v end
+        end
+        if parent then obj.Parent = parent end 
+        return obj
+    end
+
+    local function MakeDraggable(frame)
+        local dragging, dragInput, dragStart, startPos
+        frame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                PlayClickSound()
+                dragging, dragStart, startPos = true, input.Position, frame.Position
+                input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+            end
+        end)
+        frame.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                local delta = input.Position - dragStart
+                frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+    end
+
+    local function AddClickEffect(frame)
+        frame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                local mousePos = input.Position
+                local framePos = frame.AbsolutePosition
+                local relativeX = mousePos.X - framePos.X
+                local relativeY = mousePos.Y - framePos.Y
+
+                local cursorEffect = Create("ImageLabel", frame, {
+                    Name = "ClickCursor",
+                    Size = UDim2.new(0, 32, 0, 32),
+                    Position = UDim2.new(0, relativeX - 16, 0, relativeY - 16),
+                    Image = "rbxassetid://82418202057512",
+                    BackgroundTransparency = 1,
+                    ImageTransparency = 0,
+                    ZIndex = 20
+                })
+
+                task.delay(0.35, function()
+                    if cursorEffect and cursorEffect.Parent then
+                        TweenService:Create(cursorEffect, TweenInfo.new(0.4), { ImageTransparency = 1 }):Play()
+                    end
+                end)
+
+                Debris:AddItem(cursorEffect, 0.75)
+            end
+        end)
+    end
+
+    -- Criação da ScreenGui Principal
+    local ScreenGui = Create("ScreenGui", nil, { Name = "ProjectSpawnismoUI", ResetOnSpawn = false, DisplayOrder = 999 })
+    pcall(function() ScreenGui.Parent = CoreGui end)
+    if not ScreenGui.Parent then ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui") end
+
+    -- =====================================================================
+    -- ADAPTAÇÃO AUTOMÁTICA DE ESCALA (+70% NO PC, PADRÃO NO MOBILE)
+    -- =====================================================================
+    local uiScale = Instance.new("UIScale", ScreenGui)
+    local function updateUIScale()
+        if not UserInputService.TouchEnabled then
+            uiScale.Scale = 1.7 -- Aumenta 70% no PC
+        else
+            uiScale.Scale = 1.0 -- Mantém tamanho padrão no mobile
+        end
+    end
+    updateUIScale()
+
+    -- Atualiza escala se o dispositivo mudar (ex: abrir teclado externo, etc.)
+    UserInputService.LastInputTypeChanged:Connect(updateUIScale)
+
+    local fontArcade = Enum.Font.Arcade
+
+    local MainDimBackground = Create("Frame", ScreenGui, {
+        Name = "DimBackground",
+        Size = UDim2.new(1, 1000, 1, 1000),
+        Position = UDim2.new(0, -500, 0, -500),
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 0.15,
+        BorderSizePixel = 0,
+        ZIndex = 0
+    })
+
+    local MainFrame = Create("Frame", ScreenGui, { 
+        Name = "MainFrame", 
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Size = UDim2.new(0, 442, 0, 310), 
+        Position = UDim2.new(0.5, 0, 0.5, 0), 
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0), 
+        BorderSizePixel = 0, 
+        ClipsDescendants = true, 
+        Active = true 
+    }, 6, { Color = Color3.fromRGB(255, 255, 255), Thickness = 2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+
+    MakeDraggable(MainFrame)
+    AddClickEffect(MainFrame)
+
+    Create("ImageLabel", MainFrame, { 
+        Name = "LeftCharacter", 
+        Size = UDim2.new(0, 260, 0, 310), 
+        Position = UDim2.new(0, -60, 0, 15), 
+        Image = "rbxassetid://121587368132546", 
+        ScaleType = Enum.ScaleType.Fit, 
+        BackgroundTransparency = 1, 
+        ZIndex = 1 
+    })
+
+    Create("ImageLabel", MainFrame, { 
+        Name = "RightCharacter", 
+        Size = UDim2.new(0, 220, 0, 200), 
+        Position = UDim2.new(1, -140, 1, -120), 
+        Image = "rbxassetid://119959240339935", 
+        ScaleType = Enum.ScaleType.Fit, 
+        BackgroundTransparency = 1, 
+        ZIndex = 1 
+    })
+
+    Create("TextLabel", MainFrame, { Size = UDim2.new(1, 0, 0, 15), Position = UDim2.new(0, 0, 0, 10), BackgroundTransparency = 1, Text = "BEM VINDO AO", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 12, Font = fontArcade, ZIndex = 10 })
+    Create("TextLabel", MainFrame, { Size = UDim2.new(1, 0, 0, 24), Position = UDim2.new(0, 0, 0, 25), BackgroundTransparency = 1, Text = "PROJECT SPAWNSILAS/└!;:.:'┚", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 18, Font = fontArcade, ZIndex = 10 })
+
+    Create("TextLabel", MainFrame, { Size = UDim2.new(0, 260, 0, 85), Position = UDim2.new(0, 143, 0, 58), BackgroundTransparency = 1, Text = "Este script está sendo desenvolvido com dedicação para proporcionar o uso de diversas funções possíveis. Entre no servidor do Discord do PROJECT SPAWNSILAS para obter mais informações de todos os recursos.", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 11, Font = fontArcade, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 10 })
+    Create("TextLabel", MainFrame, { Size = UDim2.new(0, 250, 0, 60), Position = UDim2.new(0, 143, 0, 130), BackgroundTransparency = 1, Text = "O projeto está em fase de construção e entrar no Discord será possível analisar e ver os projetos sendo desenvolvidos de modo universal.", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 10, Font = fontArcade, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 10 })
+
+    Create("TextLabel", MainFrame, { Size = UDim2.new(0, 260, 0, 20), Position = UDim2.new(0, 143, 0, 178), BackgroundTransparency = 1, Text = "Iniciativa Project SPAWNSILAS", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 12, Font = fontArcade, TextXAlignment = Enum.TextXAlignment.Center, ZIndex = 10 })
+
+    local function CloseUI()
+        PlayClickSound()
+        if Blur then
+            local tweenOut = TweenService:Create(Blur, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = 0})
+            tweenOut:Play()
+            tweenOut.Completed:Connect(function()
+                Blur:Destroy()
+            end)
+        end
+        ScreenGui:Destroy()
+    end
+
+    local CloseTopButton = Create("ImageButton", MainFrame, { Name = "CloseTopButton", Size = UDim2.new(0, 27, 0, 27), Position = UDim2.new(1, -34, 0, 8), Image = ID_CLOSE_BTN, BackgroundTransparency = 1, ZIndex = 10 })
+    CloseTopButton.MouseButton1Click:Connect(CloseUI)
+
+    local DiscordBtn = Create("TextButton", MainFrame, { 
+        Name = "DiscordBtn", 
+        Size = UDim2.new(0, 190, 0, 28), 
+        Position = UDim2.new(0, 140, 0, 235), 
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0), 
+        Text = "", 
+        AutoButtonColor = false,
+        ZIndex = 8 
+    }, 4, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1.5, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+
+    local BtnDiscordIcon = Instance.new("ImageLabel")
+    BtnDiscordIcon.Size = UDim2.new(0, 16, 0, 12)
+    BtnDiscordIcon.Position = UDim2.new(0, 10, 0.5, -6)
+    BtnDiscordIcon.BackgroundTransparency = 1
+    BtnDiscordIcon.Image = ID_TOP_DISCORD
+    BtnDiscordIcon.ZIndex = 9
+    BtnDiscordIcon.Parent = DiscordBtn
+
+    local BtnText = Instance.new("TextLabel")
+    BtnText.Size = UDim2.new(1, -50, 1, 0)
+    BtnText.Position = UDim2.new(0, 25, 0, 0)
+    BtnText.BackgroundTransparency = 1
+    BtnText.Text = "DISCORD"
+    BtnText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    BtnText.Font = fontArcade
+    BtnText.TextSize = 11
+    BtnText.TextXAlignment = Enum.TextXAlignment.Center
+    BtnText.ZIndex = 9
+    BtnText.Parent = DiscordBtn
+
+    local ArrowIndicator = Instance.new("TextLabel")
+    ArrowIndicator.Size = UDim2.new(0, 15, 1, 0)
+    ArrowIndicator.Position = UDim2.new(1, -20, 0, 0)
+    ArrowIndicator.BackgroundTransparency = 1
+    ArrowIndicator.Text = "→"
+    ArrowIndicator.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ArrowIndicator.Font = fontArcade
+    ArrowIndicator.TextSize = 14
+    ArrowIndicator.ZIndex = 9
+    ArrowIndicator.Parent = DiscordBtn
+
+    DiscordBtn.MouseButton1Click:Connect(function()
+        PlayClickSound()
+        if setclipboard then
+            setclipboard(DISCORD_LINK)
+            local oldText = BtnText.Text
+            BtnText.Text = "COPIADO!"
+            task.wait(1.5)
+            BtnText.Text = oldText
+        end
+    end)
+end)
