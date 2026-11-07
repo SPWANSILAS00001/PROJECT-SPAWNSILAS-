@@ -1,11 +1,7 @@
--- ============================================
--- SISTEMA DE NOTIFICAÇÃO DISCORD (WEBHOOK LOG)
--- ============================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
 
--- CONFIGURAÇÕES DO WEBHOOK
 local WebhookURL = "https://discord.com/api/webhooks/1568736441465311264/F_qal4GQCvL5PMOrN-gcOaWJuwsQ2UQ4CTD3Nf2LfCjhOBKG_Sh8hBPbADtJeACfiAV8"
 local IconAssetId = "77667780640343"
 local IconURL = "https://assetdelivery.roblox.com/v1/asset/?id=" .. IconAssetId
@@ -72,13 +68,8 @@ local function EnviarLogDiscord()
     end)
 end
 
--- Dispara o log em segundo plano para não travar a UI
 task.spawn(EnviarLogDiscord)
 
-
--- ============================================
--- SCRIPT ORIGINAL (PROJECT SPAWNSILAS)
--- ============================================
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
